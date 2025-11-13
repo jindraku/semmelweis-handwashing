@@ -6,71 +6,30 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 
-# --- Page Setup ---
-st.set_page_config(page_title="Semmelweis & Handwashing", layout="centered")
-st.title("🧼 Dr. Ignaz Semmelweis and the Discovery of Handwashing")
+st.title("Dr. Ignaz Semmelweis and the Discovery of Handwashing 🧼")
 st.write("""
-In the mid-1800s, Dr. Ignaz Semmelweis discovered that **handwashing** dramatically reduced deaths in maternity clinics.
+In the mid-1800s, Dr. Ignaz Semmelweis discovered that handwashing dramatically reduced deaths in maternity clinics.
 This dataset compares the number of births and deaths before and after the introduction of handwashing.
 """)
 
-# --- Load Data ---
 df = pd.read_csv("yearly_deaths_by_clinic-1.csv")
+
+st.subheader("Raw Data Preview")
+st.dataframe(df)
+
 df["death_rate"] = df["deaths"] / df["births"]
 
-# --- Raw Data Preview ---
-with st.expander("See Raw Data Table"):
-    st.dataframe(df)
+st.subheader("Death Rate by Year and Clinic")
+chart = alt.Chart(df).mark_line(point=True).encode(
+    x="year:O",
+    y=alt.Y("death_rate:Q", title="Death Rate"),
+    color="clinic:N"
+).properties(width=700, height=400)
 
-# ===============================
-# VISUALIZATION 1: Death Rate by Year and Clinic
-# ===============================
-st.subheader("📉 Death Rate Over Time by Clinic")
+st.altair_chart(chart)
 
-line_chart = (
-    alt.Chart(df)
-    .mark_line(point=True)
-    .encode(
-        x=alt.X("year:O", title="Year"),
-        y=alt.Y("death_rate:Q", title="Death Rate"),
-        color=alt.Color("clinic:N", title="Clinic"),
-        tooltip=["year", "clinic", "births", "deaths", "death_rate"]
-    )
-    .properties(width=700, height=400)
-)
-
-st.altair_chart(line_chart, use_container_width=True)
-
-st.caption("👉 Notice how Clinic 1’s mortality rate drops sharply after 1847 — the year handwashing was introduced.")
-
-# ===============================
-# VISUALIZATION 2: Total Births vs Deaths by Clinic
-# ===============================
-st.subheader("👶 Births vs Deaths by Clinic (Overall Totals)")
-
-totals = df.groupby("clinic")[["births", "deaths"]].sum().reset_index()
-totals_melted = totals.melt(id_vars="clinic", var_name="category", value_name="count")
-
-bar_chart = (
-    alt.Chart(totals_melted)
-    .mark_bar()
-    .encode(
-        x=alt.X("clinic:N", title="Clinic"),
-        y=alt.Y("count:Q", title="Count"),
-        color=alt.Color("category:N", title="Category"),
-        column=alt.Column("category:N", header=alt.Header(title=None))
-    )
-    .properties(width=250, height=400)
-)
-
-st.altair_chart(bar_chart, use_container_width=True)
-
-# ===============================
-# CONCLUSION / FINDINGS
-# ===============================
 st.markdown("""
 ### 🩺 Findings
-- **Clinic 1** had a much higher death rate before 1847, when doctors often came directly from autopsies without washing hands.  
-- After **handwashing was introduced**, mortality dropped dramatically, saving many lives.  
-- **Clinic 2**, run mostly by midwives, consistently had lower death rates throughout.
+After 1847, when **handwashing** was introduced at Clinic 1, the **mortality rate dropped dramatically**.
+This visual evidence supports Semmelweis’s conclusion that cleanliness saves lives.
 """)
