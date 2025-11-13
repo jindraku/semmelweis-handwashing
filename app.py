@@ -1,7 +1,3 @@
-# app.py
-# Streamlit app visualizing Dr. Ignaz Semmelweis’s handwashing data
-# code snippet assisted by ChatGPT
-
 import streamlit as st
 import pandas as pd
 import altair as alt
@@ -17,13 +13,14 @@ df = pd.read_csv("yearly_deaths_by_clinic-1.csv")
 st.subheader("Raw Data Preview")
 st.dataframe(df)
 
-df["death_rate"] = df["deaths"] / df["births"]
+# Use correct column names from the CSV
+df["death_rate"] = df["Deaths"] / df["Birth"]
 
 st.subheader("Death Rate by Year and Clinic")
 chart = alt.Chart(df).mark_line(point=True).encode(
-    x="year:O",
+    x="Year:O",
     y=alt.Y("death_rate:Q", title="Death Rate"),
-    color="clinic:N"
+    color="Clinic:N"
 ).properties(width=700, height=400)
 
 st.altair_chart(chart)
